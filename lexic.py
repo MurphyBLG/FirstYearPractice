@@ -55,8 +55,7 @@ def convert_to_lexemes(transliterated_chain):
                 lexeme += sym[0]
             elif sym[1] == "opening square bracket":
                 result.append([lexeme, "array name"])
-                result.append(sym)
-                lexeme = ''
+                lexeme = sym[0]
                 state = "const_chain"
             else:
                 sys.exit("REJECT")
@@ -77,9 +76,9 @@ def convert_to_lexemes(transliterated_chain):
             if sym[1] == "digit":
                 lexeme += sym[0]
             elif sym[1] == "closing square bracket":
+                lexeme += sym[0]
                 result.append([lexeme, "integer constant chain"])
                 lexeme = ''
-                result.append(sym)
                 state = "chain_space"
             elif sym[1] == "comma":
                 lexeme += sym[0]
@@ -130,8 +129,7 @@ def convert_to_lexemes(transliterated_chain):
                 lexeme += sym[0]
             elif sym[1] == "opening bracket":
                 result.append([lexeme, "function name"])
-                result.append(sym)
-                lexeme = ''
+                lexeme = sym[0]
                 state = "id_chain"
             else:
                 sys.exit("REJECT")
@@ -149,9 +147,9 @@ def convert_to_lexemes(transliterated_chain):
             if sym[1] in ["letter", "digit"]:
                 lexeme += sym[0]
             elif sym[1] == "closing bracket":
+                lexeme += sym[0]
                 result.append([lexeme, "identifier chain"])
                 lexeme = ''
-                result.append(sym)
                 state = "final"
             elif sym[1] == "comma":
                 lexeme += sym[0]
