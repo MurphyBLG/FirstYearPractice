@@ -10,14 +10,11 @@ def transliterate(chain):
             result.append([chain[i], "letter"])
         elif chain[i].isdigit():
             result.append([chain[i], "digit"])
-        elif chain[i] == ':':
-            result.append([':', "colon"])
-        elif chain[i] == '=':
-            result.append(['=', "equals"])
-        elif chain[i] == '+' or chain[i] == '-':
+        elif i + 1 < len(chain) and chain[i] + chain[i + 1] == ":=":
+            result.append([":=", "assignment operator"])
+            i += 1
+        elif chain[i] in ['+', '-', '*']:
             result.append([chain[i], "sign"])
-        elif chain[i] == '*':
-            result.append([chain[i], "arithmetic sign"])
         elif chain[i] == ' ':
             result.append([chain[i], "space"])
         elif chain[i] == '[':

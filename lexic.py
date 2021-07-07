@@ -1,88 +1,175 @@
 import sys
 
-special_symbols = ["assignment operator",
-                   "space",
-                   "comma",
-                   "opening square bracket",
-                   "closing square bracket",
-                   "opening bracket",
-                   "closing bracket",
-                   "arithmetic sign",
-                   "semicolon"]
-
-
-def append_identifier(lexeme, result, next_lex):
-    result.append([lexeme, "identifier"])
-    result.append(next_lex)
-
 
 def convert_to_lexemes(transliterated_chain):
     state = "start"
     lexeme = ''
     result = []
+    acceptable = False
 
-    i = 0
-    while i < len(transliterated_chain):
+    for sym in transliterated_chain:
         if state == "start":
-            if transliterated_chain[i][1] == "letter":
-                lexeme += transliterated_chain[i][0]
-                state = "identifier"
-            elif transliterated_chain[i][1] == "space":
+            if sym[1] == "letter":
+                lexeme += sym[0]
+                state = "var_name"
+            elif sym[1] == "space":
                 continue
             else:
-                sys.exit("Identifier must be started with letter")
+                sys.exit("REJECT")
 
-        elif state == "identifier":
-            if transliterated_chain[i][1] in ["letter", "digit"]:
-                lexeme += transliterated_chain[i][0]
-            elif lexeme:
-                append_identifier(lexeme, result, transliterated_chain[i])
-                state = transliterated_chain[i][1]
+        elif state == "var_name":
+            if sym[1] in ["letter", "digit"]:
+                lexeme += sym[0]
+            elif sym[1] == "space":
+                result.append([lexeme, "variable name"])
                 lexeme = ''
-
-        elif state in special_symbols:
-            if transliterated_chain[i][1] in ["letter", "digit", "sign"]:
-                lexeme += transliterated_chain[i][0]
-                if transliterated_chain[i][1] == "digit":
-                    state = "integer constant"
-                elif transliterated_chain[i][1] == "sign":
-                    state = "sign"
-                else:
-                    state = "identifier"
+                state = "var_space"
+            elif sym[1] == "assignment operator":
+                result.append([lexeme, "variable name"])
+                lexeme = ''
+                state = "as_op"
+                result.append([":=", "assignment operator"])
             else:
-                result.append(transliterated_chain[i])
-                state = transliterated_chain[i][1]
+                sys.exit("REJECT")
 
-        elif state == "integer constant":
-            if transliterated_chain[i][1] == "digit":
-                lexeme += transliterated_chain[i][0]
-            elif lexeme:
-                if len(lexeme) == 1 and lexeme in ['-', '+']:
-                    result.append([lexeme, "arithmetic sign"])
-                else:
-                    result.append([lexeme, "integer constant"])
-                lexeme = ''
-                result.append(transliterated_chain[i])
-                state = transliterated_chain[i][1]
-
-        elif state == "sign":
-            if transliterated_chain[i][1] == "sign":
-                sys.exit("There is no such token")
-            elif transliterated_chain[i][1] == "digit":
-                lexeme += transliterated_chain[i][0]
-                state = "integer constant"
+        elif state == "var_space":
+            if sym[1] == "space":
+                continue
+            elif sym[1] == "assignment operator":
+                state = "as_op"
+                result.append([":=", "assignment operator"])
             else:
-                result.append([lexeme, "arithmetic sign"])
-                result.append(transliterated_chain[i])
-                state = transliterated_chain[i][1]
+                sys.exit("REJECT")
+
+        elif state == "as_op":
+            if sym[1] == "letter":
+                lexeme += sym[0]
+                state = "arr_name"
+            elif sym[1] == "space":
+                continue
+            else:
+                sys.exit("REJECT")
+
+        elif state == "arr_name":
+            if sym[1] in ["letter", "digit"]:
+                lexeme += sym[0]
+            elif sym[1] == "opening square bracket":
+                result.append([lexeme, "array name"])
+                result.append(sym)
                 lexeme = ''
+                state = "const_chain"
+            else:
+                sys.exit("REJECT")
+
+        elif state == "const_chain":
+            if sym[1] == "digit":
+                lexeme += sym[0]
+                state = "const"
+            elif sym[1] == "sign":
+                lexeme += sym[0]
+                state = "check_on_sign"
+            elif sym[1] == "space":
+                continue
+            else:
+                sys.exit("REJECT")
+
+        elif state == "const":
+            if sym[1] == "digit":
+                lexeme += sym[0]
+            elif sym[1] == "closing square bracket":
+                result.append([lexeme, "integer constant chain"])
+                lexeme = ''
+                result.append(sym)
+                state = "chain_space"
+            elif sym[1] == "comma":
+                lexeme += sym[0]
+                state = "const_chain"
+            else:
+                sys.exit("REJECT const")
+
+        elif state == "check_on_sign":
+            if sym[1] == "digit":
+                lexeme += sym[0]
+                state = "const"
+            else:
+                sys.exit("REJECT")
+
+        elif state == "chain_space":
+            if sym[1] == "letter":
+                lexeme += sym[0]
+                state = "sign_name"
+            elif sym[1] == "sign":
+                result.append([sym[0], "arithmetic sign"])
+                state = "ar_sign"
+            elif sym[1] == "space":
+                continue
+            else:
+                sys.exit("REJECT")
+
+        elif state == "sign_name":
+            if sym[1] == "letter":
+                lexeme += sym[0]
+            elif sym[1] == "space":
+                result.append([lexeme, "sign_identifier"])
+                lexeme = ''
+                state = "ar_sign"
+            else:
+                sys.exit("REJECT sign name")
+
+        elif state == "ar_sign":
+            if sym[1] == "letter":
+                lexeme += sym[0]
+                state = "f_name"
+            elif sym[1] == "space":
+                continue
+            else:
+                sys.exit("REJECT")
+
+        elif state == "f_name":
+            if sym[1] in ["letter", "digit"]:
+                lexeme += sym[0]
+            elif sym[1] == "opening bracket":
+                result.append([lexeme, "function name"])
+                result.append(sym)
+                lexeme = ''
+                state = "id_chain"
+            else:
+                sys.exit("REJECT")
+
+        elif state == "id_chain":
+            if sym[1] == "letter":
+                lexeme += sym[0]
+                state = "par_name"
+            elif sym[1] == "space":
+                continue
+            else:
+                sys.exit("REJECT")
+
+        elif state == "par_name":
+            if sym[1] in ["letter", "digit"]:
+                lexeme += sym[0]
+            elif sym[1] == "closing bracket":
+                result.append([lexeme, "identifier chain"])
+                lexeme = ''
+                result.append(sym)
+                state = "final"
+            elif sym[1] == "comma":
+                lexeme += sym[0]
+                state = "id_chain"
+            else:
+                sys.exit("REJECT")
+
+        elif state == "final":
+            if sym[1] == "semicolon":
+                result.append(sym)
+                acceptable = True
+            else:
+                sys.exit("REJECT")
 
         else:
-            result.append(transliterated_chain[i])
+            sys.exit("REJECT")
 
-        i += 1
-
-    if lexeme:
-        result.append([lexeme, ("integer", "signed integer")[lexeme[0] in ['-', '+']]])
+    if not acceptable:
+        sys.exit("REJECT")
 
     return result
