@@ -1,5 +1,18 @@
 import sys
 
+keywords = ["and", "array", "begin", "case", "const", "div", "do", "downto", "else", "end", "file", "for", "function",
+            "goto", "if", "in", "label", "mod", "nil", "not", "of", "or", "packed", "procedure", "program", "record",
+            "repeat", "set", "then", "to", "type", "until", "var", "while", "with"]
+
+
+def keyword_check(lexemes):
+    for lexeme in lexemes:
+        if lexeme[0] in keywords:
+            if lexeme[0] in ["div", "mod"]:
+                lexeme[1] = "arithmetic operation"
+            else:
+                lexeme[1] = "keyword"
+
 
 def convert_to_lexemes(transliterated_chain):
     state = "start"
@@ -98,7 +111,7 @@ def convert_to_lexemes(transliterated_chain):
                 lexeme += sym[0]
                 state = "sign_name"
             elif sym[1] == "sign":
-                result.append([sym[0], "arithmetic sign"])
+                result.append([sym[0], "arithmetic operation"])
                 state = "ar_sign"
             elif sym[1] == "space":
                 continue
@@ -169,5 +182,7 @@ def convert_to_lexemes(transliterated_chain):
 
     if not acceptable:
         sys.exit("REJECT")
+
+    keyword_check(result)
 
     return result
