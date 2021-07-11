@@ -28,7 +28,7 @@ def convert_to_lexemes(transliterated_chain):
             elif sym[1] == "space":
                 continue
             else:
-                sys.exit("REJECT")
+                return "REJECT"
 
         elif state == "var_name":
             if sym[1] in ["letter", "digit"]:
@@ -43,7 +43,7 @@ def convert_to_lexemes(transliterated_chain):
                 state = "as_op"
                 result.append([":=", "assignment operator"])
             else:
-                sys.exit("REJECT")
+                return "REJECT"
 
         elif state == "var_space":
             if sym[1] == "space":
@@ -52,7 +52,7 @@ def convert_to_lexemes(transliterated_chain):
                 state = "as_op"
                 result.append([":=", "assignment operator"])
             else:
-                sys.exit("REJECT")
+                return "REJECT"
 
         elif state == "as_op":
             if sym[1] == "letter":
@@ -61,7 +61,7 @@ def convert_to_lexemes(transliterated_chain):
             elif sym[1] == "space":
                 continue
             else:
-                sys.exit("REJECT")
+                return "REJECT"
 
         elif state == "arr_name":
             if sym[1] in ["letter", "digit"]:
@@ -71,7 +71,7 @@ def convert_to_lexemes(transliterated_chain):
                 lexeme = sym[0]
                 state = "const_chain"
             else:
-                sys.exit("REJECT")
+                return "REJECT"
 
         elif state == "const_chain":
             if sym[1] == "digit":
@@ -83,7 +83,7 @@ def convert_to_lexemes(transliterated_chain):
             elif sym[1] == "space":
                 continue
             else:
-                sys.exit("REJECT")
+                return "REJECT"
 
         elif state == "const":
             if sym[1] == "digit":
@@ -97,14 +97,14 @@ def convert_to_lexemes(transliterated_chain):
                 lexeme += sym[0]
                 state = "const_chain"
             else:
-                sys.exit("REJECT const")
+                return "REJECT"
 
         elif state == "check_on_sign":
             if sym[1] == "digit":
                 lexeme += sym[0]
                 state = "const"
             else:
-                sys.exit("REJECT")
+                return "REJECT"
 
         elif state == "chain_space":
             if sym[1] == "letter":
@@ -116,7 +116,7 @@ def convert_to_lexemes(transliterated_chain):
             elif sym[1] == "space":
                 continue
             else:
-                sys.exit("REJECT")
+                return "REJECT"
 
         elif state == "sign_name":
             if sym[1] == "letter":
@@ -126,7 +126,7 @@ def convert_to_lexemes(transliterated_chain):
                 lexeme = ''
                 state = "ar_sign"
             else:
-                sys.exit("REJECT sign name")
+                return "REJECT"
 
         elif state == "ar_sign":
             if sym[1] == "letter":
@@ -135,7 +135,7 @@ def convert_to_lexemes(transliterated_chain):
             elif sym[1] == "space":
                 continue
             else:
-                sys.exit("REJECT")
+                return "REJECT"
 
         elif state == "f_name":
             if sym[1] in ["letter", "digit"]:
@@ -145,7 +145,7 @@ def convert_to_lexemes(transliterated_chain):
                 lexeme = sym[0]
                 state = "id_chain"
             else:
-                sys.exit("REJECT")
+                return "REJECT"
 
         elif state == "id_chain":
             if sym[1] == "letter":
@@ -154,7 +154,7 @@ def convert_to_lexemes(transliterated_chain):
             elif sym[1] == "space":
                 continue
             else:
-                sys.exit("REJECT")
+                return "REJECT"
 
         elif state == "par_name":
             if sym[1] in ["letter", "digit"]:
@@ -168,20 +168,20 @@ def convert_to_lexemes(transliterated_chain):
                 lexeme += sym[0]
                 state = "id_chain"
             else:
-                sys.exit("REJECT")
+                return "REJECT"
 
         elif state == "final":
             if sym[1] == "semicolon":
                 result.append(sym)
                 acceptable = True
             else:
-                sys.exit("REJECT")
+                return "REJECT"
 
         else:
-            sys.exit("REJECT")
+            return "REJECT"
 
     if not acceptable:
-        sys.exit("REJECT")
+        return "REJECT"
 
     keyword_check(result)
 

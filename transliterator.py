@@ -30,7 +30,7 @@ def transliterate(chain):
         elif chain[i] == ';':
             result.append([chain[i], "semicolon"])
         else:
-            sys.exit("Unexpected symbol: " + chain[i])
+            return "REJECT"
 
         i += 1
 
